@@ -31,29 +31,29 @@ class WishlistModuleService extends MedusaService({
   }
 
   async addOrUpdateItem(wishlistId: string, productId: string, productVariantId: string, quantity: number) : Promise<any> {
-    const existingItem = await this.listAndCountWishlistItems({
+    const [items] = await this.listAndCountWishlistItems({
++     wishlist_id: wishlistId,
       productVariantId: productVariantId
-    })
-    if (existingItem[1]) {
-      const existingItem = await this.updateWishlistItems({
+    });
+    if (items.length > 0) {
++       const updatedItem = await this.updateWishlistItems({
         selector: {
-          productId: productId,
-          productVariantId: productVariantId
+          id: items[0].id
         },
         data: {
           quantity: quantity
         }
       })
-      return existingItem;
-    } else {
-       const newItem = await this.createWishlistItems({
-        quantity: quantity,
-        productId: productId,
-        productVariantId: productVariantId,
-        wishlist_id: wishlistId
-      })
-      return newItem;
+      return updatedItem;
     }
+    const newItem = await this.createWishlistItems({
++     quantity: quantity,
++     productId: productId,
++     productVariantId: productVariantId,
++     wishlist_id: wishlistId
++   });
++
++   return newItem;
   }
 
   async create() : Promise<string> {
